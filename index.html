@@ -314,7 +314,7 @@ end
             },
 
             /**
-             * Enables/disables buttons and shows/hides a loading indicator.
+             * Habilita/desabilita os botões e mostra/oculta um indicador de carregamento.
              * @param {boolean} isLoading - True if loading, False otherwise.
              */
             setLoadingState(isLoading) {
@@ -406,13 +406,13 @@ end
                          this.addToOutput("Lua interpreter initialized.", 'info', 'lua');
                     }
 
-                    // Execute the Lua code. Note: Lua.js executes synchronously,
-                    // which can freeze the UI for long-running code.
+                    // Executa o código Lua. Nota: Lua.js executa de forma síncrona,
+                    // o que pode travar a UI para códigos longos.
                     this.luaState.execute(userCode);
 
                     // Lua code executed successfully
                     this.setLoadingState(false); // Deactivate loading state
-                     // Remove loading message before adding success
+                     // Remover a mensagem de loading antes de adicionar o sucesso
                     const lastChild = this.outputArea.lastChild;
                      if (lastChild && lastChild.textContent.includes("Executing lua code...") && lastChild.querySelector('.animate-pulse')) {
                          lastChild.remove();
@@ -422,10 +422,10 @@ end
                 } catch (err) {
                     // Error during Lua code execution
                     this.setLoadingState(false); // Deactivate loading state
-                     // Remove loading message before adding error
+                     // Remover a mensagem de loading antes de adicionar o erro
                     const lastChild = this.outputArea.lastChild;
                      if (lastChild && lastChild.textContent.includes("Executing lua code...") && lastChild.querySelector('.animate-pulse')) {
                          lastChild.remove();
                      }
                     this.addToOutput(`Lua Error: ${err.message || err}`, 'error', 'lua');
-                    // Lua.js may not provide detailed trace
+                   
