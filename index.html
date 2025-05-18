@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executor de Código Multi-Linguagem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://skulpt.org/js/skulpt.min.js" type="text/javascript"></script>
+    <script src="https://skulpt.org/js/skulpt-stdlib.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/lua-js@latest/dist/lua.js"></script>
+    <style>
+        /* Estilos customizados para complementar Tailwind e definir layout base */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1e293b; /* slate-800 */
+            color: #f8fafc; /* slate-50 */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container {
+            flex-grow: 1; /* Permite que o container principal ocupe o espaço restante */
+            display: flex;
+            flex-direction: column;
+        }
+        /* Define a altura mínima para os containers do editor e saída em telas menores */
+        .editor-container, .output-container {
+             min-height: 300px; /* Altura mínima para evitar colapso */
+             display: flex; /* Usa flexbox para alinhar título e área de texto/pre */
+             flex-direction: column; /* Empilha título e área verticalmente */
+        }
+        #code-editor, #output-area {
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+            border: 1px solid #334155; /* slate-700 */
+            border-radius: 0.375rem; /* rounded-md */
+            flex-grow: 1; /* Permite que o editor/saída ocupe o espaço restante no seu container */
+            font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para código */
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.5; /* Espaçamento entre linhas */
+            padding: 0.75rem; /* p-3 */
+            resize: none; /* Impede redimensionamento manual do textarea */
+            outline: none; /* Remove o outline padrão ao focar */
+        }
+         #output-area {
+            color: #94a3b8; /* slate-400 */
+            white-space: pre-wrap; /* Preserva espaços e quebra linha */
+            word-wrap: break-word; /* Quebra palavras longas */
+            overflow-y: auto; /* Adiciona barra de rolagem vertical */
+        }
+        .btn {
+            transition: background-color 0.3s ease, opacity 0.3s ease; /* Adiciona transição para opacidade */
+        }
+        .btn-primary {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) { /* Efeito hover apenas se não estiver desabilitado */
+            background-color: #1d4ed8; /* blue-700 */
+        }
+         .btn-secondary {
+            background-color: #475569; /* slate-600 */
+            color: white;
+        }
+        .btn-secondary:hover:not(:disabled) { /* Efeito hover apenas se não estiver desabilitado */
+            background-color: #334155; /* slate-700 */
+        }
+        .btn:disabled { /* Estilo para botão desabilitado */
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .title-bar {
+            background-color: #334155; /* slate-700 */
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            font-weight: 500; /* medium */
+            border-top-left-radius: 0.375rem; /* rounded-tl-md */
+            border-top-right-radius: 0.375rem; /* rounded-tr-md */
+            flex-shrink: 0; /* Impede que a barra de título encolha */
+        }
+        /* Estilos para a barra de rolagem (customização) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; /* slate-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; /* slate-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* slate-500 */
+        }
+        /* Estilo para o seletor de linguagem */
+        #language-select {
+            background-color: #334155; /* slate-700 */
+            color: #f8fafc; /* slate-50 */
+            border: 1px solid #475569; /* slate-600 */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            appearance: none; /* Remove a seta padrão do select */
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20fill%3D%22%23f8fafc%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%2F%3E%3C%2Fsvg%3E'); /* Adiciona uma seta customizada */
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em auto;
+        }
+        #language-select:hover {
+             border-color: #64748b; /* slate-500 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 flex flex-col h-screen">
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl font-extrabold text-slate-100 mb-2">Executor de Código Multi-Linguagem</h1>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                 <label for="language-select" class="text-slate-300 font-medium">Selecione a Linguagem:</label>
+                 <select id="language-select">
+                    <option value="python">Python (via Skulpt)</option>
+                    <option value="lua">Lua (via Lua.js)</option>
+                    </select>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-0">
+            <div class="editor-container bg-slate-800 rounded-lg shadow-xl overflow-hidden">
+                <div class="title-bar text-slate-200">
+                    Editor de Código (<span id="current-language-title">Python</span>)
+                </div>
+                <textarea id="code-editor"
+                    placeholder="Digite seu código aqui..."
+                    class="w-full h-full"></textarea>
+            </div>
+
+            <div class="output-container bg-slate-800 rounded-lg shadow-xl overflow-hidden">
+                 <div class="title-bar text-slate-200">
+                    Saída
+                </div>
+                <pre id="output-area" class="w-full h-full"></pre>
+            </div>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <button id="run-button"
+                class="btn btn-primary py-3 px-8 rounded-md font-semibold shadow-md hover:shadow-lg text-lg">
+                Executar Código
+            </button>
+            <button id="clear-output-button"
+                class="btn btn-secondary py-3 px-8 rounded-md font-semibold shadow-md hover:shadow-lg text-lg">
+                Limpar Saída
+            </button>
+        </div>
+
+        <footer class="text-center text-sm text-slate-400 mt-8 pb-4">
+            Executor de código multi-linguagem simples (Python via Skulpt, Lua via Lua.js). O suporte às linguagens é limitado pelas bibliotecas JavaScript/WebAssembly utilizadas.
+        </footer>
+    </div>
+
+    <script type="text/javascript">
+        // Objeto principal para gerenciar o Executor Multi-Linguagem
+        const MultiLangExecutor = {
+            // Referências aos elementos do DOM
+            codeEditor: document.getElementById('code-editor'),
+            outputArea: document.getElementById('output-area'),
+            runButton: document.getElementById('run-button'),
+            clearOutputButton: document.getElementById('clear-output-button'),
+            languageSelect: document.getElementById('language-select'),
+            currentLanguageTitle: document.getElementById('current-language-title'),
+
+            // Mapa de emojis para tipos de mensagem
+            EMOJI_MAP: {
+                log: '📝', // Emoji genérico para log
+                python: '🐍', // Python emoji
+                lua: '🌙', // Lua emoji (lua significa lua em português)
+                error: '❌',
+                warn: '⚠️',
+                info: 'ℹ️',
+                success: '✅',
+                loading: '⏳' // Emoji para estado de carregamento
+            },
+
+            // Código de exemplo para cada linguagem
+            EXAMPLE_CODE: {
+                python: `# Bem-vindo ao Executor de Código Python!
+# Experimente com Python (limitado pelo Skulpt).
+
+def saudacao(nome):
+  return f"Olá, {nome} do Python!"
+
+nome_usuario = "Usuário Skulpt"
+print(saudacao(nome_usuario))
+
+numeros = [1, 2, 3, 4, 5]
+quadrados = [n*n for n in numeros]
+print(f"Quadrados: {quadrados}")
+
+# Tente importar um módulo suportado (ex: math, random)
+# import math
+# print(f"Pi: {math.pi}")
+
+# Erros serão capturados:
+# print(variavel_nao_definida)
+# resultado = 10 / 0
+`,
+                lua: `-- Bem-vindo ao Executor de Código Lua!
+-- Experimente com Lua (limitado pelo Lua.js).
+
+function saudacao(nome)
+  return "Olá, "..nome.." do Lua!"
+end
+
+nome_usuario = "Usuário Lua.js"
+print(saudacao(nome_usuario))
+
+numeros = {1, 2, 3, 4, 5}
+print("Números:")
+for i, v in ipairs(numeros) do
+  print(v)
+end
+
+-- Erros serão capturados:
+-- print(variavel_nao_definida)
+-- resultado = 10 / 0
+`
+            },
+
+            // Estado atual da linguagem selecionada
+            currentLanguage: 'python',
+            luaState: null, // Para manter o estado do interpretador Lua
+
+            /**
+             * Adiciona uma mensagem formatada à área de saída.
+             * @param {string} message - A mensagem a ser exibida.
+             * @param {string} type - O tipo da mensagem ('log', 'error', 'warn', 'info', 'success', 'loading').
+             * @param {string} lang - A linguagem associada à mensagem (para emoji específico).
+             */
+            addToOutput(message, type = 'log', lang = null) {
+                const emoji = lang ? (this.EMOJI_MAP[lang] || this.EMOJI_MAP.log) : (this.EMOJI_MAP[type] || this.EMOJI_MAP.log);
+                const timestamp = new Date().toLocaleTimeString();
+                const messageElement = document.createElement('div');
+
+                let textColorClass = 'text-slate-400'; // Cor padrão para logs
+                if (type === 'error') {
+                    textColorClass = 'text-red-400';
+                } else if (type === 'warn') {
+                    textColorClass = 'text-yellow-400';
+                } else if (type === 'success') {
+                    textColorClass = 'text-green-400';
+                } else if (type === 'info') {
+                     textColorClass = 'text-blue-400';
+                } else if (type === 'loading') {
+                    textColorClass = 'text-yellow-500 animate-pulse'; // Animação para loading
+                }
+
+                // Sanitizar a mensagem para evitar injeção de HTML (básico)
+                const textNode = document.createTextNode(message);
+                const spanMessage = document.createElement('span');
+                spanMessage.className = textColorClass;
+                spanMessage.appendChild(textNode);
+
+                messageElement.innerHTML = `<span class="font-mono text-xs text-slate-500 mr-2">[${timestamp}]</span> ${emoji} `;
+                messageElement.appendChild(spanMessage);
+
+                this.outputArea.appendChild(messageElement);
+                this.outputArea.scrollTop = this.outputArea.scrollHeight; // Rolar para o final
+            },
+
+            /**
+             * Callback para capturar a saída do Skulpt (print).
+             * @param {string} text - O texto impresso pelo código Python.
+             */
+            skulptOutput(text) {
+                // Skulpt pode adicionar uma nova linha extra, remover se existir
+                const cleanedText = text.endsWith('\n') ? text.slice(0, -1) : text;
+                if (cleanedText) { // Apenas adicionar se não estiver vazio
+                     MultiLangExecutor.addToOutput(cleanedText, 'log', 'python');
+                }
+            },
+
+             /**
+             * Callback para capturar a saída do Lua.js (print).
+             * Lua.js print envia argumentos separados, precisamos juntá-los.
+             * @param {...any} args - Argumentos passados para print() em Lua.
+             */
+            luaOutput(...args) {
+                 const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+                 MultiLangExecutor.addToOutput(message, 'log', 'lua');
+                 // Lua print geralmente adiciona uma nova linha por padrão,
+                 // mas dependendo da configuração do Lua.js, pode ser necessário adicionar uma aqui.
+                 // Para simplificar, vamos assumir que ele já adiciona ou que a quebra de linha
+                 // não é estritamente necessária para cada print individual.
+                 // Se necessário, adicionar: MultiLangExecutor.addToOutput('', 'log', 'lua');
+            },
+
+
+            /**
+             * Callback para ler módulos embutidos (necessário pelo Skulpt).
+             * @param {string} x - O nome do módulo a ser lido.
+             * @returns {string} O código-fonte do módulo.
+             * @throws {string} Se o módulo não for encontrado.
+             */
+            builtinRead(x) {
+                if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
+                    throw "File not found: '" + x + "'";
+                }
+                return Sk.builtinFiles["files"][x];
+            },
+
+            /**
+             * Habilita/desabilita os botões e mostra/oculta um indicador de carregamento.
+             * @param {boolean} isLoading - True se estiver carregando, False caso contrário.
+             */
+            setLoadingState(isLoading) {
+                this.runButton.disabled = isLoading;
+                this.clearOutputButton.disabled = isLoading;
+                this.languageSelect.disabled = isLoading; // Desabilita o seletor durante a execução
+                 if (isLoading) {
+                     // Remover a mensagem de loading anterior se existir
+                     const lastChild = this.outputArea.lastChild;
+                      if (lastChild && lastChild.textContent.includes("Executando código...") && lastChild.querySelector('.animate-pulse')) {
+                         lastChild.remove();
+                     }
+                     this.addToOutput(`Executando código ${this.currentLanguage}...`, 'loading', this.currentLanguage);
+                 } else {
+                     // A mensagem de loading será removida ou substituída pelo resultado (sucesso/erro)
+                 }
+            },
+
+            /**
+             * Executa o código Python digitado no editor.
+             */
+            runPythonCode() {
+                const userCode = this.codeEditor.value;
+                this.setLoadingState(true); // Ativa estado de carregamento
+
+                Sk.configure({
+                    output: this.skulptOutput, // Redirecionar print() para a nossa função
+                    read: this.builtinRead,     // Função para importar módulos
+                    __future__: Sk.python3 // Usar semântica Python 3
+                });
+
+                // Executar o código assincronamente com Skulpt
+                const executionPromise = Sk.misceval.asyncToPromise(() => {
+                    return Sk.importMainWithBody("<stdin>", false, userCode, true);
+                });
+
+                executionPromise.then(
+                    (mod) => {
+                        // O código Python foi executado com sucesso
+                        this.setLoadingState(false); // Desativa estado de carregamento
+                         // Remover a mensagem de loading antes de adicionar o sucesso
+                        const lastChild = this.outputArea.lastChild;
+                         if (lastChild && lastChild.textContent.includes("Executando código python...") && lastChild.querySelector('.animate-pulse')) {
+                             lastChild.remove();
+                         }
+                        this.addToOutput("Execução Python concluída.", 'success', 'python');
+                    },
+                    (err) => {
+                        // Erro durante a execução do código Python
+                        this.setLoadingState(false); // Desativa estado de carregamento
+                         // Remover a mensagem de loading antes de adicionar o erro
+                        const lastChild = this.outputArea.lastChild;
+                         if (lastChild && lastChild.textContent.includes("Executando código python...") && lastChild.querySelector('.animate-pulse')) {
+                             lastChild.remove();
+                         }
+
+                        this.addToOutput(`Erro Skulpt: ${err.toString()}`, 'error', 'python');
+                        // Exibir traceback se disponível
+                        if (err.traceback) {
+                            err.traceback.forEach((tb) => {
+                                this.addToOutput(`  em ${tb.filename}, linha ${tb.lineno}`, 'error');
+                            });
+                        }
+                    }
+                );
+            },
+
+            /**
+             * Executa o código Lua digitado no editor.
+             */
+            runLuaCode() {
+                const userCode = this.codeEditor.value;
+                this.setLoadingState(true); // Ativa estado de carregamento
+
+                try {
+                    // Inicializa o estado Lua se ainda não foi feito
+                    if (!this.luaState) {
+                         this.luaState = new Lua.State();
+                         // Redireciona a função print do Lua para o nosso addToOutput
+                         // Lua.js print envia argumentos separados, precisamos tratá-los
+                         this.luaState.execute(`
+                            local original_print = print
+                            print = function(...)
+                                local args = {...}
+                                -- Passa os argumentos para a função JavaScript
+                                js.global.MultiLangExecutor.luaOutput(unpack(args))
+                            end
+                         `);
+                         this.addToOutput("Interpretador Lua inicializado.", 'info', 'lua');
+                    }
+
+                    // Executa o código Lua. Nota: Lua.js executa de forma síncrona,
+                    // o que pode travar a UI para códigos longos.
+                    this.luaState.execute(userCode);
+
+                    // Código Lua executado com sucesso
+                    this.setLoadingState(false); // Desativa estado de carregamento
+                     // Remover a mensagem de loading antes de adicionar o sucesso
+                    const lastChild = this.outputArea.lastChild;
+                     if (lastChild && lastChild.textContent.includes("Executando código lua...") && lastChild.querySelector('.animate-pulse')) {
+                         lastChild.remove();
+                     }
+                    this.addToOutput("Execução Lua concluída.", 'success', 'lua');
+
+                } catch (err) {
+                   
