@@ -3,12 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Language Code Executor</title>
+    <title>Multi-Language Code Executor (Embedded)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://skulpt.org/js/skulpt.min.js" type="text/javascript"></script>
-    <script src="https://skulpt.org/js/skulpt-stdlib.js" type="text/javascript"></script>
-    <script src="https://unpkg.com/lua-js@latest/dist/lua.js"></script>
+
+    <script type="text/javascript">
+        // --- Conteúdo de skulpt.min.js aqui ---
+        // Conteúdo completo da biblioteca Skulpt (versão minificada)
+        // Como o conteúdo é grande, ele será representado por este comentário.
+        // Em um arquivo real, o código JavaScript completo estaria aqui.
+        /* Skulpt source code goes here */
+!function(){var k={},v="Sk.",C=!0,A=!1,O=0,E=1,U=2,j=3,q=4,G=5,V=6,K=7,J=8,Q=9,Z=10,tt=11,nt=12,rt=13,it=14,ot=15,at=16,st=17,ct=18,ut=19,lt=20,ht=21,pt=22,dt=23,ft=24,mt=25,gt=26,yt=27,vt=28,wt=29,bt=30,St=31,kt=32,Ct=33,At=34,Ot=35,Et=36,Ut=37,jt=38,qt=39,Gt=40,Vt=41,Kt=42,Jt=43,Qt=44,Zt=45,tn=46,nn=47,rn=48,...... (rest of skulpt.min.js content)
+    </script>
+
+    <script type="text/javascript">
+        // --- Conteúdo de skulpt-stdlib.js aqui ---
+        // Conteúdo completo da biblioteca padrão do Skulpt
+        // Como o conteúdo é grande, ele será representado por este comentário.
+        // Em um arquivo real, o código JavaScript completo estaria aqui.
+        /* Skulpt stdlib source code goes here */
+        Sk.builtinFiles=Sk.builtinFiles||{};Sk.builtinFiles["files"]={"__builtin__.py":'print = Sk.builtins["print"]\nrange = Sk.builtins["range"]\nlen = Sk.builtins["len"]\n... (rest of skulpt-stdlib.js content)
+    </script>
+
+    <script type="text/javascript">
+        // --- Conteúdo de lua.js aqui ---
+        // Conteúdo completo da biblioteca Lua.js (versão minificada)
+        // Como o conteúdo é grande, ele será representado por este comentário.
+        // Em um arquivo real, o código JavaScript completo estaria aqui.
+        /* Lua.js source code goes here */
+        !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.Lua=t():e.Lua=t()}("undefined"!=typeof self?self:this,function(){return function(e){var t={};function n(r){if(t[r])return t[r].exports;var i=t[r]={i:r,l:!1,exports:{}};return e[r].call(i.exports,i,i.exports,n),i.l=!0,i.exports}return n.m=e,n.c=t,n.d=function(e,t,r){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var i in e)n.d(r,i,function(t){return e[t]}.bind(null,i));return r},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p=""}({... (rest of lua.js content)
+    });
+    </script>
+
+
     <style>
         /* Custom styles to complement Tailwind and define base layout */
         body {
@@ -174,11 +201,11 @@
             languageSelect: document.getElementById('language-select'),
             currentLanguageTitle: document.getElementById('current-language-title'),
 
-            // Map of emojis for message types
+            // Mapa de emojis para tipos de mensagem
             EMOJI_MAP: {
-                log: '📝', // Generic log emoji
-                python: '🐍', // Python emoji
-                lua: '🌙', // Lua emoji (lua means moon in Portuguese)
+                log: '', // Generic log emoji
+                python: '', // Python emoji
+                lua: '', // Lua emoji (lua means moon in Portuguese)
                 error: '❌',
                 warn: '⚠️',
                 info: 'ℹ️',
@@ -377,55 +404,4 @@ end
                             err.traceback.forEach((tb) => {
                                 this.addToOutput(`  in ${tb.filename}, line ${tb.lineno}`, 'error');
                             });
-                        }
-                    }
-                );
-            },
-
-            /**
-             * Executes the Lua code entered in the editor.
-             */
-            runLuaCode() {
-                const userCode = this.codeEditor.value;
-                this.setLoadingState(true); // Activate loading state
-
-                try {
-                    // Initialize Lua state if not already done
-                    if (!this.luaState) {
-                         this.luaState = new Lua.State();
-                         // Redirect Lua's print function to our addToOutput
-                         // Lua.js print sends arguments separately, we need to handle them
-                         this.luaState.execute(`
-                            local original_print = print
-                            print = function(...)
-                                local args = {...}
-                                -- Pass arguments to the JavaScript function
-                                js.global.MultiLangExecutor.luaOutput(unpack(args))
-                            end
-                         `);
-                         this.addToOutput("Lua interpreter initialized.", 'info', 'lua');
-                    }
-
-                    // Executa o código Lua. Nota: Lua.js executa de forma síncrona,
-                    // o que pode travar a UI para códigos longos.
-                    this.luaState.execute(userCode);
-
-                    // Lua code executed successfully
-                    this.setLoadingState(false); // Deactivate loading state
-                     // Remover a mensagem de loading antes de adicionar o sucesso
-                    const lastChild = this.outputArea.lastChild;
-                     if (lastChild && lastChild.textContent.includes("Executing lua code...") && lastChild.querySelector('.animate-pulse')) {
-                         lastChild.remove();
-                     }
-                    this.addToOutput("Lua execution completed.", 'success', 'lua');
-
-                } catch (err) {
-                    // Error during Lua code execution
-                    this.setLoadingState(false); // Deactivate loading state
-                     // Remover a mensagem de loading antes de adicionar o erro
-                    const lastChild = this.outputArea.lastChild;
-                     if (lastChild && lastChild.textContent.includes("Executing lua code...") && lastChild.querySelector('.animate-pulse')) {
-                         lastChild.remove();
-                     }
-                    this.addToOutput(`Lua Error: ${err.message || err}`, 'error', 'lua');
-                   
+               
