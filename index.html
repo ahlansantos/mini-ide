@@ -1,407 +1,730 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Language Code Executor (Embedded)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <script type="text/javascript">
-        // --- Conteúdo de skulpt.min.js aqui ---
-        // Conteúdo completo da biblioteca Skulpt (versão minificada)
-        // Como o conteúdo é grande, ele será representado por este comentário.
-        // Em um arquivo real, o código JavaScript completo estaria aqui.
-        /* Skulpt source code goes here */
-!function(){var k={},v="Sk.",C=!0,A=!1,O=0,E=1,U=2,j=3,q=4,G=5,V=6,K=7,J=8,Q=9,Z=10,tt=11,nt=12,rt=13,it=14,ot=15,at=16,st=17,ct=18,ut=19,lt=20,ht=21,pt=22,dt=23,ft=24,mt=25,gt=26,yt=27,vt=28,wt=29,bt=30,St=31,kt=32,Ct=33,At=34,Ot=35,Et=36,Ut=37,jt=38,qt=39,Gt=40,Vt=41,Kt=42,Jt=43,Qt=44,Zt=45,tn=46,nn=47,rn=48,...... (rest of skulpt.min.js content)
-    </script>
-
-    <script type="text/javascript">
-        // --- Conteúdo de skulpt-stdlib.js aqui ---
-        // Conteúdo completo da biblioteca padrão do Skulpt
-        // Como o conteúdo é grande, ele será representado por este comentário.
-        // Em um arquivo real, o código JavaScript completo estaria aqui.
-        /* Skulpt stdlib source code goes here */
-        Sk.builtinFiles=Sk.builtinFiles||{};Sk.builtinFiles["files"]={"__builtin__.py":'print = Sk.builtins["print"]\nrange = Sk.builtins["range"]\nlen = Sk.builtins["len"]\n... (rest of skulpt-stdlib.js content)
-    </script>
-
-    <script type="text/javascript">
-        // --- Conteúdo de lua.js aqui ---
-        // Conteúdo completo da biblioteca Lua.js (versão minificada)
-        // Como o conteúdo é grande, ele será representado por este comentário.
-        // Em um arquivo real, o código JavaScript completo estaria aqui.
-        /* Lua.js source code goes here */
-        !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.Lua=t():e.Lua=t()}("undefined"!=typeof self?self:this,function(){return function(e){var t={};function n(r){if(t[r])return t[r].exports;var i=t[r]={i:r,l:!1,exports:{}};return e[r].call(i.exports,i,i.exports,n),i.l=!0,i.exports}return n.m=e,n.c=t,n.d=function(e,t,r){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var i in e)n.d(r,i,function(t){return e[t]}.bind(null,i));return r},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p=""}({... (rest of lua.js content)
-    });
-    </script>
-
-
+    <title>Criador de UI - Propriedades e Resize</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        /* Custom styles to complement Tailwind and define base layout */
+        /* Estilos personalizados para o tema escuro e barra macOS */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1e293b; /* slate-800 */
-            color: #f8fafc; /* slate-50 */
+            background-color: #1e1e1e; /* Fundo escuro */
+            color: #e0e0e0; /* Texto claro */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            overflow: hidden; /* Evita scroll no body */
+        }
+
+        .mac-window {
+            background-color: #2d2d2d; /* Fundo da janela */
+            border-radius: 8px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            height: calc(100vh - 40px); /* Altura ajustada para a tela */
+            margin: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
         }
-        .container {
-            flex-grow: 1; /* Allow the main container to take up remaining space */
+
+        .mac-title-bar {
+            height: 30px;
+            background-color: #3c3c3c; /* Cor da barra de título */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+            -webkit-user-select: none; /* Desabilita seleção */
+            user-select: none;
+            flex-shrink: 0; /* Impede que a barra encolha */
         }
-        /* Define minimum height for editor and output containers on smaller screens */
-        .editor-container, .output-container {
-             min-height: 300px; /* Minimum height to prevent collapse */
-             display: flex; /* Use flexbox to align title and text area/pre */
-             flex-direction: column; /* Stack title and area vertically */
+
+        .mac-title {
+            text-align: center;
+            flex-grow: 1; /* Centraliza o título */
+            font-size: 0.9rem;
+            color: #cccccc;
         }
-        #code-editor, #output-area {
-            background-color: #0f172a; /* slate-900 */
-            color: #e2e8f0; /* slate-200 */
-            border: 1px solid #334155; /* slate-700 */
-            border-radius: 0.375rem; /* rounded-md */
-            flex-grow: 1; /* Allow editor/output to take up remaining space in its container */
-            font-family: 'Courier New', Courier, monospace; /* Monospaced font for code */
-            font-size: 0.875rem; /* text-sm */
-            line-height: 1.5; /* Line spacing */
-            padding: 0.75rem; /* p-3 */
-            resize: none; /* Prevent manual resizing of textarea */
-            outline: none; /* Remove default outline on focus */
+
+        .mac-buttons {
+            display: flex;
+            gap: 6px;
         }
-         #output-area {
-            color: #94a3b8; /* slate-400 */
-            white-space: pre-wrap; /* Preserve spaces and wrap lines */
-            word-wrap: break-word; /* Break long words */
-            overflow-y: auto; /* Add vertical scrollbar */
-        }
-        .btn {
-            transition: background-color 0.3s ease, opacity 0.3s ease; /* Add opacity transition */
-        }
-        .btn-primary {
-            background-color: #2563eb; /* blue-600 */
-            color: white;
-        }
-        .btn-primary:hover:not(:disabled) { /* Hover effect only if not disabled */
-            background-color: #1d4ed8; /* blue-700 */
-        }
-         .btn-secondary {
-            background-color: #475569; /* slate-600 */
-            color: white;
-        }
-        .btn-secondary:hover:not(:disabled) { /* Hover effect only if not disabled */
-            background-color: #334155; /* slate-700 */
-        }
-        .btn:disabled { /* Style for disabled button */
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .title-bar {
-            background-color: #334155; /* slate-700 */
-            padding: 0.75rem 1rem; /* py-3 px-4 */
-            font-weight: 500; /* medium */
-            border-top-left-radius: 0.375rem; /* rounded-tl-md */
-            border-top-right-radius: 0.375rem; /* rounded-tr-md */
-            flex-shrink: 0; /* Prevent title bar from shrinking */
-        }
-        /* Scrollbar styling customization */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a; /* slate-900 */
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569; /* slate-600 */
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b; /* slate-500 */
-        }
-        /* Style for the language select dropdown */
-        #language-select {
-            background-color: #334155; /* slate-700 */
-            color: #f8fafc; /* slate-50 */
-            border: 1px solid #475569; /* slate-600 */
-            border-radius: 0.375rem; /* rounded-md */
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
+
+        .mac-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
             cursor: pointer;
-            outline: none;
-            appearance: none; /* Remove default select arrow */
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20fill%3D%22%23f8fafc%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%2F%3E%3C%2Fsvg%3E'); /* Add custom arrow */
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1.5em auto;
         }
-        #language-select:hover {
-             border-color: #64748b; /* slate-500 */
+
+        .mac-button.close { background-color: #ff605c; }
+        .mac-button.minimize { background-color: #ffbd44; }
+        .mac-button.maximize { background-color: #00ca4e; }
+
+        .container-content {
+            flex-grow: 1; /* Permite que o conteúdo ocupe o espaço restante */
+            padding: 20px;
+            overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
         }
+
+        /* Estilos das abas */
+        .tab-nav a {
+            color: #a0a0a0;
+            border-color: transparent;
+        }
+
+        .tab-nav a.active {
+            color: #e0e0e0;
+            border-color: #007aff; /* Cor azul do macOS */
+        }
+
+        /* Estilos da Toolbox */
+        #toolbox {
+            background-color: #3c3c3c; /* Fundo da toolbox */
+            color: #e0e0e0;
+        }
+
+        .draggable-element {
+            cursor: grab;
+            margin: 5px;
+            padding: 8px; /* Aumenta o padding */
+            border: 1px solid #555; /* Borda mais escura */
+            background-color: #4a4a4a; /* Fundo do elemento */
+            user-select: none;
+            border-radius: 4px; /* Cantos arredondados */
+            transition: background-color 0.2s ease;
+        }
+
+        .draggable-element:hover {
+            background-color: #5a5a5a; /* Fundo ao passar o mouse */
+        }
+
+        .draggable-element:active {
+            cursor: grabbing;
+            background-color: #6a6a6a; /* Fundo ao arrastar */
+        }
+
+        /* Estilos do Canvas */
+        #canvas {
+            min-height: 500px; /* Altura mínima aumentada */
+            border: 2px dashed #555; /* Borda tracejada mais escura */
+            background-color: #252526; /* Fundo do canvas */
+            padding: 10px;
+            position: relative; /* Necessário para posicionamento de elementos */
+            overflow-y: auto; /* Permite scroll se os elementos excederem a altura */
+        }
+
+        /* Estilos para os elementos arrastados no canvas */
+        #canvas .dropped-element {
+            margin: 10px; /* Espaçamento entre elementos */
+            padding: 8px; /* Padding para a área de interação */
+            border: 1px dashed #a0a0a0; /* Borda tracejada */
+            cursor: pointer; /* Cursor de ponteiro para seleção */
+            box-sizing: border-box; /* Inclui padding e border no tamanho */
+            min-width: 20px; /* Largura mínima para redimensionar */
+            min-height: 20px; /* Altura mínima para redimensionar */
+            user-select: none; /* Desabilita seleção de texto por padrão */
+            outline: none; /* Remove outline ao focar */
+            position: relative; /* Para o botão de delete */
+            display: inline-block; /* Permite que elementos fiquem lado a lado se couberem */
+            vertical-align: top; /* Alinha elementos ao topo */
+        }
+
+         /* Estilos específicos para tipos de elementos dropados */
+        #canvas button.dropped-element {
+             background-color: #007aff; /* Azul macOS */
+             color: white;
+             border: none;
+             border-radius: 4px;
+             padding: 8px 12px;
+             font-size: 0.9rem;
+             cursor: pointer;
+        }
+
+        #canvas p.dropped-element {
+            color: #e0e0e0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        #canvas h2.dropped-element {
+            color: #e0e0e0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        #canvas img.dropped-element {
+            display: block; /* Remove espaço extra abaixo da imagem */
+            max-width: 100%; /* Imagem responsiva dentro do seu contêiner */
+            height: auto;
+        }
+
+         #canvas div.dropped-element {
+             background-color: rgba(100, 100, 100, 0.3); /* Fundo semi-transparente */
+             border: 1px dashed #a0a0a0;
+         }
+
+        /* Estilo para o elemento selecionado */
+        #canvas .dropped-element.selected {
+            border-color: #007aff; /* Borda azul para indicar seleção */
+            box-shadow: 0 0 5px rgba(0, 122, 255, 0.5); /* Sombra azul */
+        }
+
+        /* Estilos para a área de código e propriedades */
+        #generated-code {
+            background-color: #252526; /* Fundo escuro */
+            color: #e0e0e0; /* Texto claro */
+            border-color: #555;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+
+        #properties-panel {
+            background-color: #3c3c3c; /* Fundo do painel de propriedades */
+            color: #e0e0e0;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* Oculto por padrão */
+        }
+
+        #properties-panel label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        #properties-panel input[type="text"],
+        #properties-panel textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #555;
+            background-color: #4a4a4a;
+            color: #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        #properties-panel button.delete-button {
+            background-color: #ff605c; /* Vermelho */
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        #properties-panel button.delete-button:hover {
+            background-color: #d04040;
+        }
+
+        #copy-code {
+            background-color: #007aff; /* Azul macOS */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        #copy-code:hover {
+            background-color: #005bb5; /* Azul mais escuro ao passar o mouse */
+        }
+
+        #copy-message {
+            color: #00ca4e; /* Verde para sucesso */
+        }
+
+        /* Estilos para redimensionamento (interact.js) */
+        .resize-drag {
+            /* interact.js adiciona classes para redimensionamento */
+            box-sizing: border-box;
+        }
+
+        .resize-drag.interact-resizing {
+            border-color: #007aff; /* Borda azul durante o redimensionamento */
+        }
+
+         /* Botão de delete no elemento */
+         .delete-element-button {
+             position: absolute;
+             top: -10px;
+             right: -10px;
+             background-color: #ff605c;
+             color: white;
+             border: none;
+             border-radius: 50%;
+             width: 20px;
+             height: 20px;
+             font-size: 12px;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             cursor: pointer;
+             z-index: 10; /* Garante que fique acima do elemento */
+             opacity: 0; /* Oculto por padrão */
+             transition: opacity 0.2s ease;
+         }
+
+         .dropped-element.selected .delete-element-button {
+             opacity: 1; /* Visível quando o elemento é selecionado */
+         }
+
+
     </style>
 </head>
-<body class="antialiased">
-    <div class="container mx-auto p-4 flex flex-col h-screen">
-        <header class="mb-6 text-center">
-            <h1 class="text-3xl font-extrabold text-slate-100 mb-2">Multi-Language Code Executor</h1>
-            <div class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                 <label for="language-select" class="text-slate-300 font-medium">Select Language:</label>
-                 <select id="language-select">
-                    <option value="python">Python (via Skulpt)</option>
-                    <option value="lua">Lua (via Lua.js)</option>
-                    </select>
+<body class="bg-gray-100">
+
+    <div class="mac-window">
+        <div class="mac-title-bar">
+            <div class="mac-buttons">
+                <span class="mac-button close"></span>
+                <span class="mac-button minimize"></span>
+                <span class="mac-button maximize"></span>
             </div>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-0">
-            <div class="editor-container bg-slate-800 rounded-lg shadow-xl overflow-hidden">
-                <div class="title-bar text-slate-200">
-                    Code Editor (<span id="current-language-title">Python</span>)
-                </div>
-                <textarea id="code-editor"
-                    placeholder="Enter your code here..."
-                    class="w-full h-full"></textarea> </div>
-
-            <div class="output-container bg-slate-800 rounded-lg shadow-xl overflow-hidden">
-                 <div class="title-bar text-slate-200">
-                    Output
-                </div>
-                <pre id="output-area" class="w-full h-full"></pre> </div>
+            <div class="mac-title">Criador de UI Básico</div>
         </div>
 
-        <div class="mt-6 flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-            <button id="run-button"
-                class="btn btn-primary py-3 px-8 rounded-md font-semibold shadow-md hover:shadow-lg text-lg">
-                Run Code
-            </button>
-            <button id="clear-output-button"
-                class="btn btn-secondary py-3 px-8 rounded-md font-semibold shadow-md hover:shadow-lg text-lg">
-                Clear Output
-            </button>
-        </div>
+        <div class="container-content">
+            <div class="container mx-auto">
 
-        <footer class="text-center text-sm text-slate-400 mt-8 pb-4">
-            Simple multi-language code executor (Python via Skulpt, Lua via Lua.js). Language support is limited by the JavaScript/WebAssembly libraries used.
-        </footer>
+                <div class="border-b border-gray-700 mb-4">
+                    <nav class="-mb-px flex space-x-8 tab-nav" aria-label="Tabs">
+                        <a href="#" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm active" aria-current="page">
+                            CODE
+                        </a>
+                        </nav>
+                </div>
+
+                <div id="code-tab-content">
+                    <div class="flex flex-col lg:flex-row gap-6">
+
+                        <div class="w-full lg:w-1/4 p-4 rounded-md shadow-inner" id="toolbox">
+                            <h2 class="text-lg font-semibold mb-4">Módulos HTML</h2>
+                            <div id="toolbox-elements" class="space-y-2">
+                                <div class="draggable-element rounded-md" draggable="true" data-type="button">Botão</div>
+                                <div class="draggable-element rounded-md" draggable="true" data-type="text">Texto (Parágrafo)</div>
+                                <div class="draggable-element rounded-md" draggable="true" data-type="heading">Título (H2)</div>
+                                <div class="draggable-element rounded-md" draggable="true" data-type="image">Imagem</div>
+                                <div class="draggable-element rounded-md" draggable="true" data-type="div">Div Container</div>
+                                </div>
+                        </div>
+
+                        <div class="w-full lg:w-3/4 flex flex-col gap-6">
+                            <h2 class="text-lg font-semibold mb-4">Área de Trabalho</h2>
+
+                            <div id="canvas" class="rounded-md flex-grow">
+                                <p class="text-gray-500 text-center mt-20">Arraste os módulos HTML para cá.</p>
+                            </div>
+
+                            <div id="properties-panel">
+                                <h3 class="text-md font-semibold mb-4">Propriedades do Elemento</h3>
+                                <div id="property-inputs">
+                                    </div>
+                                <button class="delete-button mt-4" id="delete-element-button-panel">Excluir Elemento</button>
+                            </div>
+
+                            <div>
+                                <h3 class="text-md font-semibold mb-2">Código HTML Gerado</h3>
+                                <textarea id="generated-code" class="w-full h-64 p-2 border rounded-md text-sm font-mono" readonly></textarea>
+                                <button id="copy-code" class="mt-2">Copiar Código</button>
+                                <span id="copy-message" class="ml-2 text-sm opacity-0 transition-opacity duration-300">Copiado!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script type="text/javascript">
-        // Main object to manage the Multi-Language Executor
-        const MultiLangExecutor = {
-            // References to DOM elements
-            codeEditor: document.getElementById('code-editor'),
-            outputArea: document.getElementById('output-area'),
-            runButton: document.getElementById('run-button'),
-            clearOutputButton: document.getElementById('clear-output-button'),
-            languageSelect: document.getElementById('language-select'),
-            currentLanguageTitle: document.getElementById('current-language-title'),
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
-            // Mapa de emojis para tipos de mensagem
-            EMOJI_MAP: {
-                log: '', // Generic log emoji
-                python: '', // Python emoji
-                lua: '', // Lua emoji (lua means moon in Portuguese)
-                error: '❌',
-                warn: '⚠️',
-                info: 'ℹ️',
-                success: '✅',
-                loading: '⏳' // Loading state emoji
-            },
+    <script>
+        const toolboxElements = document.getElementById('toolbox-elements');
+        const canvas = document.getElementById('canvas');
+        const generatedCodeTextarea = document.getElementById('generated-code');
+        const copyCodeButton = document.getElementById('copy-code');
+        const copyMessage = document.getElementById('copy-message');
+        const propertiesPanel = document.getElementById('properties-panel');
+        const propertyInputsDiv = document.getElementById('property-inputs');
+        const deleteElementButtonPanel = document.getElementById('delete-element-button-panel');
 
-            // Example code for each language
-            EXAMPLE_CODE: {
-                python: `# Welcome to the Python Code Executor!
-# Experiment with Python (limited by Skulpt).
+        let draggedElementType = null;
+        let selectedElement = null; // Armazena o elemento selecionado no canvas
 
-def greet(name):
-  return f"Hello, {name} from Python!"
+        // --- Drag and Drop da Toolbox para o Canvas ---
 
-user_name = "Skulpt User"
-print(greet(user_name))
+        toolboxElements.querySelectorAll('.draggable-element').forEach(element => {
+            element.addEventListener('dragstart', (event) => {
+                draggedElementType = event.target.dataset.type;
+                event.dataTransfer.setData('text/plain', draggedElementType);
+                console.log('Drag started from toolbox:', draggedElementType);
+            });
+        });
 
-numbers = [1, 2, 3, 4, 5]
-squares = [n*n for n in numbers]
-print(f"Squares: {squares}")
+        canvas.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            canvas.classList.add('border-indigo-500');
+        });
 
-# Try importing a supported module (e.g., math, random)
-# import math
-# print(f"Pi: {math.pi}")
+        canvas.addEventListener('dragleave', () => {
+            canvas.classList.remove('border-indigo-500');
+        });
 
-# Errors will be caught:
-# print(undefined_variable)
-# result = 10 / 0
-`,
-                lua: `-- Welcome to the Lua Code Executor!
--- Experiment with Lua (limited by Lua.js).
+        canvas.addEventListener('drop', (event) => {
+            event.preventDefault();
+            canvas.classList.remove('border-indigo-500');
 
-function greet(name)
-  return "Hello, "..name.." from Lua!"
-end
+            const type = event.dataTransfer.getData('text/plain') || draggedElementType;
+            console.log('Dropped element type:', type);
 
-user_name = "Lua.js User"
-print(greet(user_name))
+            if (type) {
+                const newElement = createNewElement(type);
+                if (newElement) {
+                    const initialMessage = canvas.querySelector('p.text-gray-500');
+                    if (initialMessage) {
+                        initialMessage.remove();
+                    }
+                    canvas.appendChild(newElement);
 
-numbers = {1, 2, 3, 4, 5}
-print("Numbers:")
-for i, v in ipairs(numbers) do
-  print(v)
-end
+                    // Torna o novo elemento redimensionável e clicável para seleção
+                    makeElementResizable(newElement);
+                    addSelectionListener(newElement);
+                    addDeleteButtonToElement(newElement); // Adiciona o botão de delete visual
 
--- Errors will be caught:
--- print(undefined_variable)
--- result = 10 / 0
-`
-            },
-
-            // Current selected language state
-            currentLanguage: 'python',
-            luaState: null, // To maintain the state of the Lua interpreter
-
-            /**
-             * Adds a formatted message to the output area.
-             * @param {string} message - The message to display.
-             * @param {string} type - The message type ('log', 'error', 'warn', 'info', 'success', 'loading').
-             * @param {string} lang - The language associated with the message (for specific emoji).
-             */
-            addToOutput(message, type = 'log', lang = null) {
-                const emoji = lang ? (this.EMOJI_MAP[lang] || this.EMOJI_MAP.log) : (this.EMOJI_MAP[type] || this.EMOJI_MAP.log);
-                const timestamp = new Date().toLocaleTimeString();
-                const messageElement = document.createElement('div');
-
-                let textColorClass = 'text-slate-400'; // Default color for logs
-                if (type === 'error') {
-                    textColorClass = 'text-red-400';
-                } else if (type === 'warn') {
-                    textColorClass = 'text-yellow-400';
-                } else if (type === 'success') {
-                    textColorClass = 'text-green-400';
-                } else if (type === 'info') {
-                     textColorClass = 'text-blue-400';
-                } else if (type === 'loading') {
-                    textColorClass = 'text-yellow-500 animate-pulse'; // Animation for loading
+                    updateGeneratedCode(); // Atualiza o código após adicionar
                 }
+            }
+            draggedElementType = null;
+        });
 
-                // Sanitize the message to prevent basic HTML injection
-                const textNode = document.createTextNode(message);
-                const spanMessage = document.createElement('span');
-                spanMessage.className = textColorClass;
-                spanMessage.appendChild(textNode);
+        // Cria um novo elemento baseado no tipo
+        function createNewElement(type) {
+            let element = null;
+            switch (type) {
+                case 'button':
+                    element = document.createElement('button');
+                    element.textContent = 'Novo Botão';
+                    element.className = 'dropped-element'; // Classes base
+                    break;
+                case 'text':
+                    element = document.createElement('p');
+                    element.textContent = 'Este é um novo parágrafo de texto.';
+                    element.className = 'dropped-element'; // Classes base
+                    break;
+                case 'heading':
+                    element = document.createElement('h2');
+                    element.textContent = 'Novo Título';
+                    element.className = 'dropped-element'; // Classes base
+                    break;
+                case 'image':
+                    element = document.createElement('img');
+                    element.src = 'https://placehold.co/150x100/E0E0E0/333333?text=Imagem'; // Placeholder
+                    element.alt = 'Imagem Placeholder';
+                    element.className = 'dropped-element'; // Classes base
+                    element.style.width = '150px'; // Tamanho inicial
+                    element.style.height = '100px';
+                    break;
+                case 'div':
+                    element = document.createElement('div');
+                    element.textContent = 'Div Container';
+                    element.className = 'dropped-element'; // Classes base
+                    element.style.width = '100px'; // Tamanho inicial
+                    element.style.height = '100px';
+                    break;
+                default:
+                    console.error('Tipo de elemento desconhecido:', type);
+                    return null;
+            }
+            element.classList.add('resize-drag'); // Adiciona classe para interact.js
+            return element;
+        }
 
-                messageElement.innerHTML = `<span class="font-mono text-xs text-slate-500 mr-2">[${timestamp}]</span> ${emoji} `;
-                messageElement.appendChild(spanMessage);
+        // --- Interact.js para Redimensionamento ---
 
-                this.outputArea.appendChild(messageElement);
-                this.outputArea.scrollTop = this.outputArea.scrollHeight; // Scroll to the bottom
-            },
+        function makeElementResizable(element) {
+             interact(element)
+                .resizable({
+                    edges: { left: true, right: true, bottom: true, top: true },
+                    inertia: true,
+                    modifiers: [
+                        interact.modifiers.restrictRect({
+                             // Restringe ao contêiner (canvas) - ajustado para fluxo de layout
+                             restriction: 'parent',
+                             endOnly: true
+                        }),
+                        interact.modifiers.restrictSize({
+                            min: { width: 20, height: 20 }
+                        })
+                    ],
+                    listeners: {
+                        move (event) {
+                            let target = event.target;
+                            // Atualiza o tamanho do elemento
+                            target.style.width = event.rect.width + 'px';
+                            target.style.height = event.rect.height + 'px';
+                            // Como não usamos translate, não precisamos atualizar data-x/data-y
+                        },
+                        end (event) {
+                             // Atualiza código após o resize terminar
+                             updateGeneratedCode();
+                        }
+                    }
+                });
+        }
 
-            /**
-             * Callback to capture Skulpt output (print).
-             * @param {string} text - The text printed by the Python code.
-             */
-            skulptOutput(text) {
-                // Skulpt might add an extra newline, remove if it exists
-                const cleanedText = text.endsWith('\n') ? text.slice(0, -1) : text;
-                if (cleanedText) { // Only add if not empty
-                     MultiLangExecutor.addToOutput(cleanedText, 'log', 'python');
+        // --- Seleção de Elemento ---
+
+        function addSelectionListener(element) {
+            element.addEventListener('click', (event) => {
+                // Impede que o clique no elemento propague para o canvas e desfaça a seleção
+                event.stopPropagation();
+
+                // Remove a classe 'selected' de todos os elementos
+                canvas.querySelectorAll('.dropped-element').forEach(el => {
+                    el.classList.remove('selected');
+                });
+
+                // Adiciona a classe 'selected' ao elemento clicado
+                element.classList.add('selected');
+                selectedElement = element; // Define o elemento selecionado
+
+                // Mostra o painel de propriedades e popula com as propriedades do elemento
+                showPropertiesPanel(element);
+            });
+        }
+
+        // Remove a seleção ao clicar fora dos elementos no canvas
+        canvas.addEventListener('click', (event) => {
+             // Verifica se o clique foi diretamente no canvas e não em um elemento dropado
+             if (event.target === canvas) {
+                 deselectElement();
+             }
+        });
+
+        function deselectElement() {
+             canvas.querySelectorAll('.dropped-element').forEach(el => {
+                 el.classList.remove('selected');
+             });
+             selectedElement = null;
+             hidePropertiesPanel(); // Oculta o painel ao deselecionar
+        }
+
+        // --- Painel de Propriedades ---
+
+        function showPropertiesPanel(element) {
+            propertiesPanel.style.display = 'block';
+            propertyInputsDiv.innerHTML = ''; // Limpa inputs anteriores
+
+            // Adiciona inputs de propriedades baseados no tipo de elemento
+            const elementType = element.tagName.toLowerCase();
+
+            // Propriedade de Texto (para botões, parágrafos, títulos)
+            if (elementType === 'button' || elementType === 'p' || elementType === 'h2') {
+                const textInput = createPropertyInput('text', 'Conteúdo de Texto:', element.textContent);
+                textInput.addEventListener('input', (event) => {
+                    element.textContent = event.target.value;
+                    updateGeneratedCode(); // Atualiza código ao mudar o texto
+                });
+                propertyInputsDiv.appendChild(textInput);
+            }
+
+            // Propriedade de Imagem (para imagens)
+            if (elementType === 'img') {
+                 const srcInput = createPropertyInput('text', 'URL da Imagem (src):', element.src);
+                 srcInput.addEventListener('input', (event) => {
+                     element.src = event.target.value;
+                     updateGeneratedCode(); // Atualiza código ao mudar a URL
+                 });
+                 propertyInputsDiv.appendChild(srcInput);
+
+                 const altInput = createPropertyInput('text', 'Texto Alternativo (alt):', element.alt);
+                 altInput.addEventListener('input', (event) => {
+                     element.alt = event.target.value;
+                     updateGeneratedCode(); // Atualiza código ao mudar o alt
+                 });
+                 propertyInputsDiv.appendChild(altInput);
+            }
+
+             // Propriedade de Tamanho (largura e altura) - para todos os elementos redimensionáveis
+             const widthInput = createPropertyInput('text', 'Largura (px ou auto):', element.style.width || 'auto');
+             widthInput.addEventListener('input', (event) => {
+                 element.style.width = event.target.value;
+                 updateGeneratedCode(); // Atualiza código ao mudar a largura
+             });
+             propertyInputsDiv.appendChild(widthInput);
+
+             const heightInput = createPropertyInput('text', 'Altura (px ou auto):', element.style.height || 'auto');
+             heightInput.addEventListener('input', (event) => {
+                 element.style.height = event.target.value;
+                 updateGeneratedCode(); // Atualiza código ao mudar a altura
+             });
+             propertyInputsDiv.appendChild(heightInput);
+
+
+            // Adicione mais propriedades aqui conforme necessário (ex: cor, padding, etc.)
+        }
+
+        function createPropertyInput(type, labelText, value) {
+            const div = document.createElement('div');
+            const label = document.createElement('label');
+            label.textContent = labelText;
+            const input = document.createElement(type === 'textarea' ? 'textarea' : 'input');
+            input.type = type;
+            input.value = value;
+
+            div.appendChild(label);
+            div.appendChild(input);
+            return div;
+        }
+
+        function hidePropertiesPanel() {
+            propertiesPanel.style.display = 'none';
+            propertyInputsDiv.innerHTML = ''; // Limpa os inputs
+        }
+        
+
+        // --- Exclusão de Elemento ---
+
+        // Adiciona um pequeno botão de delete visual ao elemento dropado
+        function addDeleteButtonToElement(element) {
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'x';
+            deleteButton.className = 'delete-element-button';
+            deleteButton.title = 'Excluir Elemento';
+            element.appendChild(deleteButton);
+
+            deleteButton.addEventListener('click', (event) => {
+                event.stopPropagation(); // Impede a seleção do elemento ao clicar no botão de delete
+                deleteElement(element);
+            });
+        }
+
+
+        // Lida com a exclusão do elemento selecionado (via botão no painel ou botão visual)
+        function deleteElement(elementToDelete) {
+            if (elementToDelete && elementToDelete.parentNode === canvas) {
+                elementToDelete.remove();
+                if (selectedElement === elementToDelete) {
+                    deselectElement(); // Deseleciona se o elemento excluído for o selecionado
                 }
-            },
+                updateGeneratedCode(); // Atualiza o código após excluir
+            }
+        }
 
-             /**
-             * Callback to capture Lua.js output (print).
-             * Lua.js print sends arguments separately, we need to join them.
-             * @param {...any} args - Arguments passed to print() in Lua.
-             */
-            luaOutput(...args) {
-                 const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
-                 MultiLangExecutor.addToOutput(message, 'log', 'lua');
-                 // Lua print usually adds a newline by default,
-                 // but depending on Lua.js configuration, it might be necessary to add one here.
-                 // For simplicity, we'll assume it already adds one or that newline
-                 // is not strictly necessary for each individual print.
-                 // If needed, add: MultiLangExecutor.addToOutput('', 'log', 'lua');
-            },
+        // Event listener para o botão "Excluir Elemento" no painel de propriedades
+        deleteElementButtonPanel.addEventListener('click', () => {
+            if (selectedElement) {
+                deleteElement(selectedElement);
+            }
+        });
 
 
-            /**
-             * Callback to read built-in modules (required by Skulpt).
-             * @param {string} x - The name of the module to read.
-             * @returns {string} The source code of the module.
-             * @throws {string} If the module is not found.
-             */
-            builtinRead(x) {
-                if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
-                    throw "File not found: '" + x + "'";
-                }
-                return Sk.builtinFiles["files"][x];
-            },
+        // --- Geração de Código HTML ---
 
-            /**
-             * Habilita/desabilita os botões e mostra/oculta um indicador de carregamento.
-             * @param {boolean} isLoading - True if loading, False otherwise.
-             */
-            setLoadingState(isLoading) {
-                this.runButton.disabled = isLoading;
-                this.clearOutputButton.disabled = isLoading;
-                this.languageSelect.disabled = isLoading; // Disable select during execution
-                 if (isLoading) {
-                     // Remove previous loading message if it exists
-                     const lastChild = this.outputArea.lastChild;
-                      if (lastChild && lastChild.textContent.includes("Executing code...") && lastChild.querySelector('.animate-pulse')) {
-                         lastChild.remove();
-                     }
-                     this.addToOutput(`Executing ${this.currentLanguage} code...`, 'loading', this.currentLanguage);
-                 } else {
-                     // The loading message will be removed or replaced by the result (success/error)
+        function generateHtmlCode() {
+            const canvasClone = canvas.cloneNode(true);
+
+            const initialMessage = canvasClone.querySelector('p.text-gray-500');
+            if (initialMessage) {
+                initialMessage.remove();
+            }
+
+            canvasClone.querySelectorAll('.dropped-element').forEach(el => {
+                // Remove classes e atributos específicos do editor/interact.js
+                el.classList.remove('dropped-element', 'resize-drag', 'interact-resizing', 'selected');
+                el.removeAttribute('data-x'); // Remove data-x/y se ainda existirem de versões anteriores
+                el.removeAttribute('data-y');
+                el.removeAttribute('contenteditable'); // Remove atributo de edição
+                // Mantém estilos de tamanho (width/height) aplicados pelo redimensionamento ou painel
+                // el.removeAttribute('style'); // NÃO remova todos os estilos, apenas os de posicionamento absoluto se existirem
+
+                 // Remove o botão de delete visual do elemento
+                 const deleteButton = el.querySelector('.delete-element-button');
+                 if (deleteButton) {
+                     deleteButton.remove();
                  }
-            },
 
-            /**
-             * Executes the Python code entered in the editor.
-             */
-            runPythonCode() {
-                const userCode = this.codeEditor.value;
-                this.setLoadingState(true); // Activate loading state
+                 // Limpa estilos de posicionamento absoluto se existirem
+                 el.style.position = '';
+                 el.style.left = '';
+                 el.style.top = '';
 
-                Sk.configure({
-                    output: this.skulptOutput, // Redirect print() to our function
-                    read: this.builtinRead,     // Function to import modules
-                    __future__: Sk.python3 // Use Python 3 semantics
+                // Preserva o conteúdo de texto editado
+                if (el.tagName !== 'IMG') {
+                     // Encontra o elemento original correspondente no canvas para pegar o conteúdo atual
+                     const originalElement = Array.from(canvas.querySelectorAll('.dropped-element'))
+                                                  .find(origEl => origEl.isEqualNode(el)); // Comparação simples de nós
+                     if (originalElement) {
+                          el.textContent = originalElement.textContent;
+                     }
+                } else {
+                    // Para imagens, copia src e alt do elemento original
+                     const originalElement = Array.from(canvas.querySelectorAll('.dropped-element'))
+                                                  .find(origEl => origEl.isEqualNode(el));
+                     if (originalElement) {
+                         el.src = originalElement.src;
+                         el.alt = originalElement.alt;
+                     }
+                }
+
+            });
+
+            // Retorna o innerHTML do clone
+            return canvasClone.innerHTML.trim();
+        }
+
+        // Atualiza a área de código gerado
+        function updateGeneratedCode() {
+            const generatedCode = generateHtmlCode();
+            generatedCodeTextarea.value = generatedCode;
+        }
+
+        // Event listener para o botão de copiar código
+        copyCodeButton.addEventListener('click', () => {
+            generatedCodeTextarea.select();
+            generatedCodeTextarea.setSelectionRange(0, 99999); // Para dispositivos móveis
+
+            try {
+                navigator.clipboard.writeText(generatedCodeTextarea.value).then(() => {
+                    copyMessage.classList.remove('opacity-0');
+                    copyMessage.classList.add('opacity-100');
+                    setTimeout(() => {
+                        copyMessage.classList.remove('opacity-100');
+                        copyMessage.classList.add('opacity-0');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Erro ao copiar texto: ', err);
+                    document.execCommand('copy');
+                     copyMessage.textContent = 'Copiado (fallback)!';
+                     copyMessage.classList.remove('opacity-0');
+                     copyMessage.classList.add('opacity-100');
+                     setTimeout(() => {
+                         copyMessage.classList.remove('opacity-100');
+                         copyMessage.classList.add('opacity-0');
+                         copyMessage.textContent = 'Copiado!';
+                     }, 2000);
                 });
+            } catch (err) {
+                 console.error('Erro ao usar navigator.clipboard: ', err);
+                 generatedCodeTextarea.select();
+                 document.execCommand('copy');
+                  copyMessage.textContent = 'Copiado (fallback)!';
+                  copyMessage.classList.remove('opacity-0');
+                  copyMessage.classList.add('opacity-100');
+                  setTimeout(() => {
+                      copyMessage.classList.remove('opacity-100');
+                      copyMessage.classList.add('opacity-0');
+                      copyMessage.textContent = 'Copiado!';
+                  }, 2000);
+            }
+        });
 
-                // Execute the code asynchronously with Skulpt
-                const executionPromise = Sk.misceval.asyncToPromise(() => {
-                    return Sk.importMainWithBody("<stdin>", false, userCode, true);
-                });
+        // Chamada inicial para limpar a área de código
+        updateGeneratedCode();
 
-                executionPromise.then(
-                    (mod) => {
-                        // Python code executed successfully
-                        this.setLoadingState(false); // Deactivate loading state
-                         // Remove loading message before adding success
-                        const lastChild = this.outputArea.lastChild;
-                         if (lastChild && lastChild.textContent.includes("Executing python code...") && lastChild.querySelector('.animate-pulse')) {
-                             lastChild.remove();
-                         }
-                        this.addToOutput("Python execution completed.", 'success', 'python');
-                    },
-                    (err) => {
-                        // Error during Python code execution
-                        this.setLoadingState(false); // Deactivate loading state
-                         // Remove loading message before adding error
-                        const lastChild = this.outputArea.lastChild;
-                         if (lastChild && lastChild.textContent.includes("Executing python code...") && lastChild.querySelector('.animate-pulse')) {
-                             lastChild.remove();
-                         }
+    </script>
 
-                        this.addToOutput(`Skulpt Error: ${err.toString()}`, 'error', 'python');
-                        // Display traceback if available
-                        if (err.traceback) {
-                            err.traceback.forEach((tb) => {
-                                this.addToOutput(`  in ${tb.filename}, line ${tb.lineno}`, 'error');
-                            });
-               
+</body>
+</html>
